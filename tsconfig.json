@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    // Đầu ra và đầu vào
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Môi trường chạy Node.js
+    "target": "ES2020", // code biên dịch ra JS hiện đại
+    "module": "CommonJS", // Node.js hiểu CommonJS tốt nhất
+    "lib": ["ES2020"], // dùng các API của ES2020
+    "types": ["node"], // load type definitions của Node.js
+
+    // Hỗ trợ Decorator (cần cho TypeORM)
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // Hỗ trợ import/export kiểu ES6
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+
+    // Bản đồ debug
+    "sourceMap": true,
+
+    // Kiểm tra type chặt chẽ
+    "strict": true,
+
+    // Bỏ qua check type trong node_modules
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

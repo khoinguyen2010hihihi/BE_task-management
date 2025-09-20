@@ -1,0 +1,14 @@
+# Node.js
+node_modules/
+dist/
+build/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Environment
+.env
+
+# Logs
+logs
+*.log
