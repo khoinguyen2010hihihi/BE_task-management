@@ -53,6 +53,25 @@ export class UserRouter {
     });
 
     this.router.post('/', asyncHandler(userController.createUser.bind(userController)));
+
+    userRegistry.registerPath({
+      method: 'put',
+      path: '/users/{id}',
+      tags: ['User'],
+      request: {
+        params: UserModel.UpdateUserSchema.shape.params,
+        body: {
+          content: {
+            'application/json': {
+              schema: UserModel.UpdateUserSchema,
+            },
+          },
+        },
+      },
+      responses: createApiResponse(UserModel.UserSchema, 'Updated'),
+    });
+
+    this.router.put('/:id', asyncHandler(userController.updateUser.bind(userController)));
   }
 }
 

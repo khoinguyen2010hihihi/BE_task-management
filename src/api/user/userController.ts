@@ -19,6 +19,13 @@ export class UserController {
     const serviceResponse = await userService.create(userData);
     handleServiceResponse(serviceResponse, res)
   }
+
+  async updateUser(req: Request, res: Response): Promise<void> {
+    const id = req.params.id as string;
+    const userData = req.body
+    const serviceResponse = await userService.update(id, userData);
+    handleServiceResponse(serviceResponse, res)
+  }
 }
 
 export const userController = new UserController();

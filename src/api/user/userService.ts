@@ -3,7 +3,7 @@ import { CreateUserInput, User } from '@/api/user/userModel';
 import { userRepository } from '@/api/user/userRepository';
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse';
 import { logger } from '@/server';
-import { instanceToInstance } from 'class-transformer';
+import { instanceToInstance, instanceToPlain } from 'class-transformer';
 
 export class UserService {
   async findAll(): Promise<ServiceResponse<User[] | null>> {
@@ -41,6 +41,22 @@ export class UserService {
       return new ServiceResponse<User>(ResponseStatus.Success, 'User created successfully', safeUser, StatusCodes.CREATED);
     } catch (error) {
       const errorMessage = `Error creating user: ${(error as Error).message}`;
+      logger.error(errorMessage);
+      return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async update(id: string, userData: Partial<CreateUserInput>): Promise<ServiceResponse<User | null>> {
+    try {
+      const updatedUser = await userRepository.updateAsync(id, userData);
+      if (!updatedUser) {
+        return new ServiceResponse(ResponseStatus.Failed, 'User not found', null, StatusCodes.NOT_FOUND);
+      }
+
+      const safeUser = instanceToInstance(updatedUser);
+      return new ServiceResponse<User>(ResponseStatus.Success, 'User updated successfully', safeUser, StatusCodes.OK);
+    } catch (error) {
+      const errorMessage = `Error updating user: ${(error as Error).message}`;
       logger.error(errorMessage);
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }

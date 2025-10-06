@@ -19,6 +19,10 @@ export class UserRepository {
     return this.repo.findOneBy({ id });
   }
 
+  async findByEmailAsync(email: string): Promise<User | null> {
+    return this.repo.findOneBy({ email })
+  }
+
   async createAsync(payload: CreateUserInput): Promise<User> {
     const user = this.repo.create({
       email: payload.email,
@@ -26,6 +30,18 @@ export class UserRepository {
       passwordHash: await bcrypt.hash(payload.password, 10),
       avatarUrl: payload.avatarUrl || null,
     })
+    return this.repo.save(user)
+  }
+
+  async updateAsync(id: string, payload: Partial<CreateUserInput>): Promise<User | null> {
+    const user = await this.repo.findOneBy({ id })
+    if (!user) return null
+
+    if (payload.email) user.email = payload.email
+    if (payload.fullName) user.fullName = payload.fullName
+    if (payload.avatarUrl !== undefined) user.avatarUrl = payload.avatarUrl
+    if (payload.password) user.passwordHash = await bcrypt.hash(payload.password, 10)
+
     return this.repo.save(user)
   }
 }
