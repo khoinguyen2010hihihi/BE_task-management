@@ -19,10 +19,6 @@ export class UserRepository {
     return this.repo.findOneBy({ id });
   }
 
-  async findByEmailAsync(email: string): Promise<User | null> {
-    return this.repo.findOneBy({ email })
-  }
-
   async createAsync(payload: CreateUserInput): Promise<User> {
     const user = this.repo.create({
       email: payload.email,
