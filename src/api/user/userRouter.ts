@@ -4,6 +4,7 @@ import { UserModel } from './userModel';
 import { userController } from './userController';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { validateRequest } from '@/common/utils/httpHandlers';
+import { asyncHandler } from '@/common/middleware/asyncHandler';
 
 export const userRegistry = new OpenAPIRegistry();
 export class UserRouter {
@@ -23,7 +24,7 @@ export class UserRouter {
       responses: createApiResponse(UserModel.UserSchema.array(), 'Success'),
     });
 
-    this.router.get('/', (req, res) => userController.getAllUsers(req, res));
+    this.router.get('/', asyncHandler(userController.getAllUsers.bind(userController)));
 
     userRegistry.registerPath({
       method: 'get',
@@ -33,7 +34,7 @@ export class UserRouter {
       responses: createApiResponse(UserModel.UserSchema, 'Success'),
     });
 
-    this.router.get('/:id', validateRequest(UserModel.GetUserSchema), (req, res) => userController.getUserById(req, res));
+    this.router.get('/:id', validateRequest(UserModel.GetUserSchema), asyncHandler(userController.getUserById.bind(userController)));
 
     userRegistry.registerPath({
       method: 'post',
@@ -43,7 +44,7 @@ export class UserRouter {
         body: {
           content: {
             'application/json': {
-              schema: UserModel.CreateUserSchema.shape.body,
+              schema: UserModel.CreateUserSchema,
             },
           },
         },
@@ -51,7 +52,7 @@ export class UserRouter {
       responses: createApiResponse(UserModel.UserSchema, 'Created'),
     });
 
-    this.router.post('/', validateRequest(UserModel.CreateUserSchema), (req, res) => userController.createUser(req, res));
+    this.router.post('/', asyncHandler(userController.createUser.bind(userController)));
   }
 }
 

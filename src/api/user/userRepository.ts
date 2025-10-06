@@ -1,51 +1,33 @@
-import { User } from '@/api/user/userModel';
+import { AppDataSource } from '@/configs/typeorm.config';
+import { User } from '@/common/entities/user.entity';
 import { CreateUserInput } from '@/api/user/userModel';
+import { Repository } from 'typeorm';
+import bcrypt from 'bcrypt';
 
 export class UserRepository {
-  private users: User[] = [
-    {
-      id: 1,
-      name: 'Alice',
-      email: 'alice@example.com',
-      bio: 'Software Engineer',
-      avatarUrl: 'http://example.com/alice.jpg',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: 2,
-      name: 'Bob',
-      email: 'bob@example.com',
-      bio: 'Data Scientist',
-      avatarUrl: 'http://example.com/bob.jpg',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
+  private repo: Repository<User>;
 
-  async findAllAsync(): Promise<User[]> {
-    return this.users;
+  constructor() {
+    this.repo = AppDataSource.getRepository(User)
   }
 
-  async findByIdAsync(id: number): Promise<User | null> {
-    return this.users.find((user) => user.id === id) || null;
+  async findAllAsync(): Promise<User[]> {
+    return this.repo.find();
+  }
+
+  async findByIdAsync(id: string): Promise<User | null> {
+    return this.repo.findOneBy({ id });
   }
 
   async createAsync(payload: CreateUserInput): Promise<User> {
-    const newUser: User = {
-      id: this.users.length ? this.users[this.users.length - 1].id + 1 : 1,
-      name: payload.name,
+    const user = this.repo.create({
       email: payload.email,
-      bio: payload.bio ?? null,
-      avatarUrl: payload.avatarUrl ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.users.push(newUser);
-    return newUser;
+      fullName: payload.fullName,
+      passwordHash: await bcrypt.hash(payload.password, 10),
+      avatarUrl: payload.avatarUrl || null,
+    })
+    return this.repo.save(user)
   }
-
-  
 }
 
 export const userRepository = new UserRepository();

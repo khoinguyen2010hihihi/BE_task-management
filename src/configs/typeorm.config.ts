@@ -16,7 +16,7 @@ config()
 
 const port = Number(process.env.DB_PORT)
 
-export default new DataSource({
+export const AppDataSource = new DataSource({
   type: "postgres",
   host: process.env.DB_HOST,
   port: port,
@@ -26,5 +26,5 @@ export default new DataSource({
   entities: [User, Board, List, Card, Role, Permission, RolePermission, WorkspaceMember, BoardMember, Comment, Workspace],
   migrationsTableName: "migrations",
   migrations: [],
-  synchronize: true,
+  synchronize: false,
 })

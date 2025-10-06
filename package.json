@@ -26,7 +26,9 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.1.0",
     "@types/node": "^24.4.0",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
+    "class-transformer": "^0.5.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "envalid": "^8.1.0",
@@ -51,6 +53,7 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.6",
+    "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",

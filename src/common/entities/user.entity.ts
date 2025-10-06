@@ -6,6 +6,7 @@ import { WorkspaceMember } from './workspace-member.entity';
 import { BoardMember } from './board-member.entity';
 import { Card } from './card.entity';
 import { Comment } from './comment.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
 @Unique(['email'])
@@ -13,11 +14,11 @@ export class User extends DateTimeEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  // citext để unique case-insensitive (cần extension citext)
   @Column({ type: 'citext' })
   @Index({ unique: true })
   email!: string;
 
+  @Exclude()
   @Column({ type: 'varchar', nullable: true, name: 'password_hash' })
   passwordHash!: string | null;
 
