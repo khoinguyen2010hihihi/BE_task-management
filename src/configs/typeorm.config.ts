@@ -26,5 +26,5 @@ export const AppDataSource = new DataSource({
   entities: [User, Board, List, Card, Role, Permission, RolePermission, WorkspaceMember, BoardMember, Comment, Workspace],
   migrationsTableName: "migrations",
   migrations: [],
-  synchronize: true,
+  synchronize: false,
 })
