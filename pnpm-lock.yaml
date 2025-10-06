@@ -14,6 +14,9 @@ importers:
       '@types/node':
         specifier: ^24.4.0
         version: 24.5.2
+      bcryptjs:
+        specifier: ^3.0.2
+        version: 3.0.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1505,6 +1508,10 @@ packages:
 
   baseline-browser-mapping@2.8.6:
     resolution: {integrity: sha512-wrH5NNqren/QMtKUEEJf7z86YjfqW/2uw3IL3/xpqZUC95SSVIFXYQeeGjL6FT/X68IROu6RMehZQS5foy2BXw==}
+    hasBin: true
+
+  bcryptjs@3.0.2:
+    resolution: {integrity: sha512-k38b3XOZKv60C4E2hVsXTolJWfkGRMbILBIe2IBITXciy5bOsTKot5kDrf3ZfufQtQOUN5mXceUEpU1rTl9Uog==}
     hasBin: true
 
   before-after-hook@4.0.0:
@@ -6012,6 +6019,8 @@ snapshots:
   base64-js@1.5.1: {}
 
   baseline-browser-mapping@2.8.6: {}
+
+  bcryptjs@3.0.2: {}
 
   before-after-hook@4.0.0: {}
 

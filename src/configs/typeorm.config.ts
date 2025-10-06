@@ -19,5 +19,5 @@ export default new DataSource({
   entities: [Project, User, Board, ProjectMembers],
   migrationsTableName: "migrations",
   migrations: [],
-  synchronize: false,
+  synchronize: true,
 })
