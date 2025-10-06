@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index, OneToMany, Unique, } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index, OneToMany, Unique, ManyToMany, JoinTable, } from 'typeorm';
 import { DateTimeEntity } from './base/dateTimeEntity';
 import { Workspace } from './workspace.entity';
 import { Board } from './board.entity';
@@ -7,6 +7,7 @@ import { BoardMember } from './board-member.entity';
 import { Card } from './card.entity';
 import { Comment } from './comment.entity';
 import { Exclude } from 'class-transformer';
+import { Role } from './role.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -45,4 +46,12 @@ export class User extends DateTimeEntity {
 
   @OneToMany(() => Comment, (c) => c.author)
   comments!: Comment[];
+
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable({
+    name: 'user_roles',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
+  })
+  roles!: Role[];
 }
