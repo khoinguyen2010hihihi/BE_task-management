@@ -12,6 +12,7 @@ import requestLogger from '@/common/middleware/requestLogger';
 import { env } from '@/common/utils/envConfig';
 import { AppDataSource } from '@/configs/typeorm.config';
 import 'reflect-metadata';
+import { authRouter } from './api/auth/authRouter';
 
 AppDataSource
   .initialize()
@@ -41,6 +42,7 @@ app.use(requestLogger);
 // Routes
 app.use('/health-check', healthCheckRouter);
 app.use('/users', userRouter);
+app.use('/auth', authRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
