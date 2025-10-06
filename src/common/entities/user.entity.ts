@@ -1,27 +1,48 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index, OneToMany, Unique, } from 'typeorm';
 import { DateTimeEntity } from './base/dateTimeEntity';
-import { ProjectMembers } from './projectmembers.entity';
+import { Workspace } from './workspace.entity';
+import { Board } from './board.entity';
+import { WorkspaceMember } from './workspace-member.entity';
+import { BoardMember } from './board-member.entity';
+import { Card } from './card.entity';
+import { Comment } from './comment.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
+@Unique(['email'])
 export class User extends DateTimeEntity {
   @PrimaryGeneratedColumn('uuid')
-  public id: string;
+  id!: string;
 
-  @Column({ type: 'varchar', unique: true, length: 255 })
-  public email: string;
+  @Column({ type: 'citext' })
+  @Index({ unique: true })
+  email!: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  public password: string;
+  @Exclude()
+  @Column({ type: 'varchar', nullable: true, name: 'password_hash' })
+  passwordHash!: string | null;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  public name: string;
+  @Column({ type: 'varchar', length: 150, name: 'full_name' })
+  fullName!: string;
 
-  @Column({ type: 'text', nullable: true })
-  public bio: string;
+  @Column({ type: 'varchar', nullable: true, name: 'avatar_url' })
+  avatarUrl!: string | null;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  public avatarUrl: string;
+  @OneToMany(() => Workspace, (w) => w.owner)
+  ownedWorkspaces!: Workspace[];
 
-  @OneToMany(() => ProjectMembers, (projectMember) => projectMember.project)
-  public projectMembers: ProjectMembers[];
+  @OneToMany(() => Board, (b) => b.createdBy)
+  createdBoards!: Board[];
+
+  @OneToMany(() => WorkspaceMember, (wm) => wm.user)
+  workspaceMemberships!: WorkspaceMember[];
+
+  @OneToMany(() => BoardMember, (bm) => bm.user)
+  boardMemberships!: BoardMember[];
+
+  @OneToMany(() => Card, (c) => c.createdBy)
+  createdCards!: Card[];
+
+  @OneToMany(() => Comment, (c) => c.author)
+  comments!: Comment[];
 }

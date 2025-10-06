@@ -10,10 +10,10 @@ import errorHandler from '@/common/middleware/errorHandler';
 import rateLimiter from '@/common/middleware/rateLimiter';
 import requestLogger from '@/common/middleware/requestLogger';
 import { env } from '@/common/utils/envConfig';
-import dataSource from '@/configs/typeorm.config';
+import { AppDataSource } from '@/configs/typeorm.config';
 import 'reflect-metadata';
 
-dataSource
+AppDataSource
   .initialize()
   .then(() => {
     console.log('Data Source has been initialized!');
@@ -32,6 +32,8 @@ app.set('trust proxy', true);
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
 app.use(rateLimiter);
+
+app.use(express.json())
 
 // Request logging
 app.use(requestLogger);

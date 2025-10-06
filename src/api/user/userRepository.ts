@@ -1,16 +1,49 @@
-import { User } from '@/api/user/userModel';
+import { AppDataSource } from '@/configs/typeorm.config';
+import { User } from '@/common/entities/user.entity';
+import { CreateUserInput } from '@/api/user/userModel';
+import { Repository } from 'typeorm';
+import bcrypt from 'bcrypt';
 
-export const users: User[] = [
-  { id: 1, name: 'Alice', email: 'alice@example.com', age: 42, createdAt: new Date(), updatedAt: new Date() },
-  { id: 2, name: 'Bob', email: 'bob@example.com', age: 21, createdAt: new Date(), updatedAt: new Date() },
-];
+export class UserRepository {
+  private repo: Repository<User>;
 
-export const userRepository = {
-  findAllAsync: async (): Promise<User[]> => {
-    return users;
-  },
+  constructor() {
+    this.repo = AppDataSource.getRepository(User)
+  }
 
-  findByIdAsync: async (id: number): Promise<User | null> => {
-    return users.find((user) => user.id === id) || null;
-  },
-};
+  async findAllAsync(): Promise<User[]> {
+    return this.repo.find();
+  }
+
+  async findByIdAsync(id: string): Promise<User | null> {
+    return this.repo.findOneBy({ id });
+  }
+
+  async findByEmailAsync(email: string): Promise<User | null> {
+    return this.repo.findOneBy({ email })
+  }
+
+  async createAsync(payload: CreateUserInput): Promise<User> {
+    const user = this.repo.create({
+      email: payload.email,
+      fullName: payload.fullName,
+      passwordHash: await bcrypt.hash(payload.password, 10),
+      avatarUrl: payload.avatarUrl || null,
+    })
+    return this.repo.save(user)
+  }
+
+  async updateAsync(id: string, payload: Partial<CreateUserInput>): Promise<User | null> {
+    const user = await this.repo.findOneBy({ id })
+    if (!user) return null
+
+    if (payload.email) user.email = payload.email
+    if (payload.fullName) user.fullName = payload.fullName
+    if (payload.avatarUrl !== undefined) user.avatarUrl = payload.avatarUrl
+    if (payload.password) user.passwordHash = await bcrypt.hash(payload.password, 10)
+
+    return this.repo.save(user)
+  }
+}
+
+export const userRepository = new UserRepository();
