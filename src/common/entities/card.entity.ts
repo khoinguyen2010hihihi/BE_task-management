@@ -1,7 +1,7 @@
+import { DateTimeEntity } from './base/dateTimeEntity';
 import {
   Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index, Unique,
 } from 'typeorm';
-import { DateTimeEntity } from './base/DateTimeEntity';
 import { List } from './list.entity';
 import { User } from './user.entity';
 
