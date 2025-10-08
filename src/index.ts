@@ -9,11 +9,14 @@ app.use(bodyParser.json());
 
 setupSwagger(app);
 
-app.use("/api/users", router);
-
 app.get("/api/health", (_, res) => res.json({ status: "ok" }));
+
 AppDataSource.initialize()
   .then(() => {
+    console.log("Database connected successfully");
+
+    app.use("/", router);
+
     app.listen(3000, () => {
       console.log("Server running at http://localhost:3000");
       console.log("Swagger docs at http://localhost:3000/api-docs");

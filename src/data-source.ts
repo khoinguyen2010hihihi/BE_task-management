@@ -11,7 +11,7 @@ export const AppDataSource = new DataSource({
   username: "postgres",
   password: process.env.POSTGRESQL_PASSWORD,
   database: "mydb",
-  synchronize: false,
+  synchronize: true,
   logging: true,
   entities: [User],
 });
