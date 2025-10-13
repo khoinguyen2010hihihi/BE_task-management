@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
-import { CreateUserInput, User } from '@/api/user/userModel';
+import { CreateUserInput, User, UpdateUserInput } from '@/api/user/userModel';
 import { userRepository } from '@/api/user/userRepository';
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse';
 import { logger } from '@/server';
@@ -39,14 +39,11 @@ export class UserService {
     try {
       const passwordHash  = await bcrypt.hash(userData.password, 10);
       const newUser = await userRepository.createAsync({
-        email: userData.email,
-        fullName: userData.fullName,
-        passwordHash,
-        avatarUrl: userData.avatarUrl || null,
+        ...userData,
+        passwordHash
       })
 
       const safeUser = instanceToInstance(newUser);
-
       return new ServiceResponse<User>(ResponseStatus.Success, 'User created successfully', safeUser, StatusCodes.CREATED);
     } catch (error) {
       const errorMessage = `Error creating user: ${(error as Error).message}`;
@@ -55,9 +52,19 @@ export class UserService {
     }
   }
 
-  async update(id: string, userData: Partial<CreateUserInput>): Promise<ServiceResponse<User | null>> {
+  async update(id: string, userData: Partial<UpdateUserInput>): Promise<ServiceResponse<User | null>> {
     try {
-      const updatedUser = await userRepository.updateAsync(id, userData);
+      const payloadToUpdate: Partial<UpdateUserInput & { passwordHash?: string }> = {
+        ...userData
+      }
+
+      if (userData.password) {
+        const hashed = await bcrypt.hash(userData.password, 10);
+        payloadToUpdate.passwordHash = hashed;
+        delete payloadToUpdate.password;
+      }
+
+      const updatedUser = await userRepository.updateAsync(id, payloadToUpdate);
       if (!updatedUser) {
         return new ServiceResponse(ResponseStatus.Failed, 'User not found', null, StatusCodes.NOT_FOUND);
       }

@@ -1,6 +1,6 @@
 import { AppDataSource } from '@/configs/typeorm.config';
 import { User } from '@/common/entities/user.entity';
-import { CreateUserInput } from '@/api/user/userModel';
+import { CreateUserInput, UpdateUserInput } from '@/api/user/userModel';
 import { Repository } from 'typeorm';
 import bcrypt from 'bcrypt';
 
@@ -19,38 +19,27 @@ export class UserRepository {
     return this.repo.findOneBy({ id });
   }
 
-  // async createAsync(payload: CreateUserInput): Promise<User> {
-  //   const user = this.repo.create({
-  //     email: payload.email,
-  //     fullName: payload.fullName,
-  //     passwordHash: await bcrypt.hash(payload.password, 10),
-  //     avatarUrl: payload.avatarUrl || null,
-  //   })
-  //   return this.repo.save(user)
-  // }
-
-  async createAsync(payload: { email: string, fullName: string, passwordHash: string, avatarUrl: string | null }) {
+  async createAsync(payload: CreateUserInput & { passwordHash: string }): Promise<User> {
     const user = this.repo.create({
       email: payload.email,
       fullName: payload.fullName,
       passwordHash: payload.passwordHash,
-      avatarUrl: payload.avatarUrl || null
+      avatarUrl: payload.avatarUrl || null,
     })
-
     return this.repo.save(user)
   }
 
-  async updateAsync(id: string, payload: Partial<CreateUserInput>): Promise<User | null> {
+  async updateAsync(id: string, payload: Partial<UpdateUserInput & { passwordHash?: string }>): Promise<User | null> {
     const user = await this.repo.findOneBy({ id })
     if (!user) return null
 
     if (payload.email) user.email = payload.email
     if (payload.fullName) user.fullName = payload.fullName
     if (payload.avatarUrl !== undefined) user.avatarUrl = payload.avatarUrl
-    if (payload.password) user.passwordHash = await bcrypt.hash(payload.password, 10)
+    if (payload.passwordHash) user.passwordHash = payload.passwordHash
 
     return this.repo.save(user)
-  }
+  }   
 }
 
 export const userRepository = new UserRepository();
