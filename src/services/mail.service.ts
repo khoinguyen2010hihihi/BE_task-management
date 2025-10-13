@@ -1,0 +1,32 @@
+import nodemailer from "nodemailer";
+
+class MailService {
+  private transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  async sendVerificationEmail(email: string, token: string) {
+    const verifyLink = `${process.env.BASE_URL}/auth/verify-email?token=${token}`;
+
+    const mailOptions = {
+      from: ` <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Xác nhận đăng ký tài khoản",
+      html: `
+        <h3>Xin chào!</h3>
+        <p>Vui lòng bấm vào liên kết dưới đây để xác nhận tài khoản của bạn:</p>
+        <a href="${verifyLink}" target="_blank">${verifyLink}</a>
+        <br><br>
+        <p>Liên kết này chỉ có hiệu lực trong 24h.</p>
+      `,
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+}
+
+export default new MailService();
