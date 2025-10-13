@@ -8,7 +8,7 @@ export class UserModel {
     id: z.string().uuid(),
     email: z.string().email(),
     fullName: z.string(),
-    avatarUrl: z.string().url().nullable(),
+    avatarUrl: z.string().url().optional().nullable(),
     createdAt: z.date(),
     updatedAt: z.date(),
   });
@@ -23,7 +23,7 @@ export class UserModel {
     fullName: z.string().min(6).max(100),
     email: z.string().email(),
     password: z.string().min(6),
-    avatarUrl: z.string().optional(),
+    avatarUrl: z.string().optional().nullable(),
   });
 
   static UpdateUserSchema = z.object({
@@ -33,7 +33,7 @@ export class UserModel {
     body: z.object({
       email: z.string().email().optional(),
       password: z.string().min(6).optional(),
-      fullName: z.string().max(100).optional().nullable(),
+      fullName: z.string().max(100).optional(),
       avatarUrl: z.string().url().optional().nullable(),
     }).refine((b) => Object.keys(b).length > 0, {
       message: 'At least one field must be provided',
