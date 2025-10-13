@@ -22,7 +22,7 @@ export class Card extends DateTimeEntity {
   description!: string | null;
 
   @Column({ type: 'numeric', precision: 10, scale: 3 })
-  position!: string; // NUMERIC -> string
+  position!: string;
 
   @Column({ type: 'timestamptz', nullable: true, name: 'due_at' })
   dueAt!: Date | null;

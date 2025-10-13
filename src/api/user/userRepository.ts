@@ -19,13 +19,24 @@ export class UserRepository {
     return this.repo.findOneBy({ id });
   }
 
-  async createAsync(payload: CreateUserInput): Promise<User> {
+  // async createAsync(payload: CreateUserInput): Promise<User> {
+  //   const user = this.repo.create({
+  //     email: payload.email,
+  //     fullName: payload.fullName,
+  //     passwordHash: await bcrypt.hash(payload.password, 10),
+  //     avatarUrl: payload.avatarUrl || null,
+  //   })
+  //   return this.repo.save(user)
+  // }
+
+  async createAsync(payload: { email: string, fullName: string, passwordHash: string, avatarUrl: string | null }) {
     const user = this.repo.create({
       email: payload.email,
       fullName: payload.fullName,
-      passwordHash: await bcrypt.hash(payload.password, 10),
-      avatarUrl: payload.avatarUrl || null,
+      passwordHash: payload.passwordHash,
+      avatarUrl: payload.avatarUrl || null
     })
+
     return this.repo.save(user)
   }
 
