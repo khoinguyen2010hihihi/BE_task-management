@@ -12,7 +12,7 @@ export class AuthModel {
   static RegisterSchema = z.object({
     email: z.string().email(),
     fullName: z.string(),
-    avatarUrl: z.string().url().optional(),
+    avatarUrl: z.string().url().optional().nullable(),
     password: z.string().min(6)
   })
 

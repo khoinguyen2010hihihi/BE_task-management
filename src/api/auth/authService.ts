@@ -29,6 +29,7 @@ export class AuthService {
 
       const newUser = await userRepository.createAsync({
         email: userData.email,
+        password: userData.password,
         fullName: userData.fullName,
         passwordHash,
         avatarUrl: userData.avatarUrl || null

@@ -6,6 +6,7 @@ import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { AuthModel } from './authModel';
 import { authController } from './authController';
 import { z } from 'zod';
+import { authMiddleware } from '@/common/middleware/authMiddleware';
 
 export const authRegistry = new OpenAPIRegistry();
 
@@ -52,7 +53,7 @@ export class AuthRouter {
       },
       responses: createApiResponse(AuthModel.TokenResponseSchema, 'Token refreshed'),
     });
-    this.router.post('/refresh-token', asyncHandler(authController.refresh.bind(authController)));
+    this.router.post('/refresh-token', authMiddleware, asyncHandler(authController.refresh.bind(authController)));
 
     // Logout
     authRegistry.registerPath({
@@ -61,7 +62,7 @@ export class AuthRouter {
       tags: ['Auth'],
       responses: createApiResponse(z.object({ message: z.string() }), 'Logged out'),
     });
-    this.router.post('/logout', asyncHandler(authController.logout.bind(authController)));
+    this.router.post('/logout', authMiddleware, asyncHandler(authController.logout.bind(authController)));
   }
 }
 
