@@ -25,7 +25,15 @@ export class AuthService {
         return new ServiceResponse(ResponseStatus.Failed, 'Email already in use', null, StatusCodes.CONFLICT);
       }
 
-      const newUser = await userRepository.createAsync(userData);
+      const passwordHash = await bcrypt.hash(userData.password, 10);
+
+      const newUser = await userRepository.createAsync({
+        email: userData.email,
+        fullName: userData.fullName,
+        passwordHash,
+        avatarUrl: userData.avatarUrl || null
+      });
+      
       const safeUser = instanceToInstance(newUser);
 
       return new ServiceResponse(ResponseStatus.Success, 'User registered successfully', { user: safeUser }, StatusCodes.CREATED);

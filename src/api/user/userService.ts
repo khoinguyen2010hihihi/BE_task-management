@@ -4,6 +4,7 @@ import { userRepository } from '@/api/user/userRepository';
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse';
 import { logger } from '@/server';
 import { instanceToInstance, instanceToPlain } from 'class-transformer';
+import bcrypt from 'bcrypt'
 
 export class UserService {
   async findAll(): Promise<ServiceResponse<User[] | null>> {
@@ -36,8 +37,16 @@ export class UserService {
 
   async create(userData: CreateUserInput): Promise<ServiceResponse<User | null>> {
     try {
-      const newUser = await userRepository.createAsync(userData);
-      const safeUser = instanceToInstance(newUser)
+      const passwordHash  = await bcrypt.hash(userData.password, 10);
+      const newUser = await userRepository.createAsync({
+        email: userData.email,
+        fullName: userData.fullName,
+        passwordHash,
+        avatarUrl: userData.avatarUrl || null,
+      })
+
+      const safeUser = instanceToInstance(newUser);
+
       return new ServiceResponse<User>(ResponseStatus.Success, 'User created successfully', safeUser, StatusCodes.CREATED);
     } catch (error) {
       const errorMessage = `Error creating user: ${(error as Error).message}`;
