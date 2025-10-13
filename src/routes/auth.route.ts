@@ -12,4 +12,9 @@ router.post(
   authControllers.loginUser
 );
 
+router.post("/register", authControllers.registerUser);
+router.get("/verify-email", authControllers.verifyEmail);
+//CRUD workspace, board, database theo rbac.
+//register,
+
 export default router;

@@ -9,7 +9,7 @@ class HashProvides {
     return { hashString, salt };
   }
 
-  async compareHash(plainText: string, hashString: string): Promise {
+  async compareHash(plainText: string, hashString: string): Promise<boolean> {
     const isMatch = await bcrypt.compare(plainText, hashString);
     return isMatch;
   }

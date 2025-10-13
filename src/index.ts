@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { AppDataSource } from "./data-source";
-import router from "./routes/user.route";
+import router from "./routes/app.route";
 import { setupSwagger } from "./api-docs/openAPIRouter";
 
 const app = express();
