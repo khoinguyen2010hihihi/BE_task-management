@@ -35,6 +35,7 @@ export class WorkspaceModel {
     }),
     body: z.object({
       name: z.string().min(3).max(100).optional(),
+      slug: z.string().min(3).max(100).optional(),
       description: z.string().nullable().optional(),
       visibility: z.nativeEnum(Visibility).optional(),
     }).refine((b) => Object.keys(b).length > 0, {
