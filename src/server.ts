@@ -13,6 +13,7 @@ import { env } from '@/common/utils/envConfig';
 import { AppDataSource } from '@/configs/typeorm.config';
 import 'reflect-metadata';
 import { authRouter } from './api/auth/authRouter';
+import { workspaceRouter } from './api/workspace/workspaceRouter';
 
 AppDataSource
   .initialize()
@@ -43,6 +44,7 @@ app.use(requestLogger);
 app.use('/health-check', healthCheckRouter);
 app.use('/users', userRouter);
 app.use('/auth', authRouter);
+app.use('/workspaces', workspaceRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
