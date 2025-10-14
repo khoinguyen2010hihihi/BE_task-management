@@ -2,9 +2,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Board } from "./board.entity";
 
 @Entity("workspace")
 export class workspace {
@@ -28,4 +30,7 @@ export class workspace {
 
   @UpdateDateColumn({ type: "timestamp" })
   updated_at!: Date;
+
+  @OneToMany(() => Board, (board) => board.workspace)
+  boards!: Board[];
 }
