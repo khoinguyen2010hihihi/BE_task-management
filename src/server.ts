@@ -14,6 +14,7 @@ import { AppDataSource } from '@/configs/typeorm.config';
 import 'reflect-metadata';
 import { authRouter } from './api/auth/authRouter';
 import { workspaceRouter } from './api/workspace/workspaceRouter';
+import { workspaceMemberRouter } from './api/workspace-member/workspaceMemberRoute';
 
 AppDataSource
   .initialize()
@@ -45,6 +46,7 @@ app.use('/health-check', healthCheckRouter);
 app.use('/users', userRouter);
 app.use('/auth', authRouter);
 app.use('/workspaces', workspaceRouter);
+app.use('/ws-members', workspaceMemberRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
