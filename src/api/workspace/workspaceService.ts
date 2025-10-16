@@ -7,6 +7,8 @@ import { AppDataSource } from '@/configs/typeorm.config';
 import { User } from '@/common/entities/user.entity';
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse';
 import { instanceToInstance } from 'class-transformer';
+import { WorkspaceMember } from '@/common/entities/workspace-member.entity';
+import { WorkspaceMemberRole } from '@/common/entities/enums';
 
 export class WorkspaceService {
   async findAll(userId: string): Promise<ServiceResponse<Workspace[] | null>> {
@@ -40,16 +42,28 @@ export class WorkspaceService {
   async create(userId: string, payload: CreateWorkspaceInput): Promise<ServiceResponse<Workspace | null>> {
     try {
       const userRepo = AppDataSource.getRepository(User);
+      const memberRepo = AppDataSource.getRepository(WorkspaceMember);
       const owner = await userRepo.findOneBy({ id: userId });
       if (!owner) {
         return new ServiceResponse(ResponseStatus.Failed, 'Owner not found', null, StatusCodes.BAD_REQUEST);
       }
 
       const workspace = await workspaceRepository.createAsync(payload, owner);
+      const ownerMember = memberRepo.create({
+        workspaceId: workspace.id,
+        userId: owner.id,
+        workspace,
+        user: owner,
+        role: WorkspaceMemberRole.OWNER,
+        invitedBy: null
+      })
+      await memberRepo.save(ownerMember);
+      const fullWorkspace = await workspaceRepository.findByIdAsync(workspace.id);
+
       return new ServiceResponse(
         ResponseStatus.Success,
         'Workspace created successfully',
-        instanceToInstance(workspace),
+        instanceToInstance(fullWorkspace),
         StatusCodes.CREATED
       );
     } catch (err) {
