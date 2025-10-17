@@ -38,6 +38,19 @@ export class WorkspaceMemberRouter {
       asyncHandler(workspaceMemberController.addMember.bind(workspaceMemberController))
     );
 
+    // Get all members (added)
+    workspaceMemberRegistry.registerPath({
+      method: "get",
+      path: "/{id}/members",
+      tags: ["Workspace Members"],
+      request: { params: WorkspaceMemberModel.AddMemberSchema.shape.params },
+      responses: createApiResponse(WorkspaceMemberModel.WorkspaceMemberSchema.array(), "Members retrieved"),
+    });
+    this.router.get(
+      "/:id/members",
+      asyncHandler(workspaceMemberController.getAllMembers.bind(workspaceMemberController))
+    );
+
     // Remove member
     workspaceMemberRegistry.registerPath({
       method: "delete",
