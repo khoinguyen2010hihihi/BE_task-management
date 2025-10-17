@@ -26,6 +26,14 @@ export class WorkspaceMemberController {
     const serviceResponse = await workspaceMemberService.changeRole(currentUserId, workspaceId, userId, payload);
     handleServiceResponse(serviceResponse, res);
   }
+
+  // added: get all members
+  async getAllMembers(req: Request, res: Response): Promise<void> {
+    const currentUserId = (req as any).user?.id;
+    const workspaceId = req.params.id as string;
+    const serviceResponse = await workspaceMemberService.getAllMembers(currentUserId, workspaceId);
+    handleServiceResponse(serviceResponse, res);
+  }
 }
 
 export const workspaceMemberController = new WorkspaceMemberController();

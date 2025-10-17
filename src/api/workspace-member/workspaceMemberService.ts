@@ -9,7 +9,7 @@ import { logger } from "@/server";
 import { AddMemberInput, ChangeRoleInput, RemoveMemberInput, WorkspaceMember } from "./workspaceMemberModel";
 
 export class WorkspaceMemberService {
-async addMember(
+  async addMember(
     currentUserId: string,
     workspaceId: string,
     payload: AddMemberInput
@@ -62,7 +62,6 @@ async addMember(
       return new ServiceResponse(ResponseStatus.Failed, msg, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
-
 
   async removeMember(currentUserId: string, params: RemoveMemberInput): Promise<ServiceResponse<null>> {
     try {
@@ -125,6 +124,37 @@ async addMember(
       return new ServiceResponse(ResponseStatus.Success, "Role updated successfully", formattedInfo, StatusCodes.OK);
     } catch (error) {
       const msg = `Error changing role: ${(error as Error).message}`;
+      logger.error(msg);
+      return new ServiceResponse(ResponseStatus.Failed, msg, null, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  // added: get all members
+  async getAllMembers(currentUserId: string, workspaceId: string): Promise<ServiceResponse<any[] | null>> {
+    try {
+      const workspace = await workspaceRepository.findByIdAsync(workspaceId);
+      if (!workspace) {
+        return new ServiceResponse(ResponseStatus.Failed, "Workspace not found", null, StatusCodes.NOT_FOUND);
+      }
+
+      const members = await workspaceMemberRepository.findAllMembersByWorkspaceId(workspaceId);
+
+      const currentMember = members.find(m => m.userId === currentUserId);
+      if (!currentMember) {
+        return new ServiceResponse(ResponseStatus.Failed, "You are not a member of this workspace", null, StatusCodes.FORBIDDEN);
+      }
+
+      const formattedMembers = members.map((m) => ({
+        userId: m.user.id,
+        fullName: m.user.fullName,
+        email: m.user.email,
+        avatarUrl: m.user.avatarUrl,
+        role: m.role,
+      }));
+
+      return new ServiceResponse(ResponseStatus.Success, "Members retrieved successfully", formattedMembers, StatusCodes.OK);
+    } catch (error) {
+      const msg = `Error retrieving members: ${(error as Error).message}`;
       logger.error(msg);
       return new ServiceResponse(ResponseStatus.Failed, msg, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
