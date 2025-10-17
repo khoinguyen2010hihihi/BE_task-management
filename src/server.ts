@@ -14,7 +14,8 @@ import { AppDataSource } from '@/configs/typeorm.config';
 import 'reflect-metadata';
 import { authRouter } from './api/auth/authRouter';
 import { workspaceRouter } from './api/workspace/workspaceRouter';
-import { workspaceMemberRouter } from './api/workspace-member/workspaceMemberRoute';
+import { workspaceMemberRouter } from './api/workspace-member/workspaceMemberRouter';
+import { boardRouter } from './api/board/boardRouter';
 
 AppDataSource
   .initialize()
@@ -47,6 +48,7 @@ app.use('/users', userRouter);
 app.use('/auth', authRouter);
 app.use('/workspaces', workspaceRouter);
 app.use('/ws-members', workspaceMemberRouter);
+app.use('/boards', boardRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
