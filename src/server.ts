@@ -16,6 +16,7 @@ import { authRouter } from './api/auth/authRouter';
 import { workspaceRouter } from './api/workspace/workspaceRouter';
 import { workspaceMemberRouter } from './api/workspace-member/workspaceMemberRouter';
 import { boardRouter } from './api/board/boardRouter';
+import { boardMemberRouter } from './api/board-member/boardMemberRouter';
 
 AppDataSource
   .initialize()
@@ -49,6 +50,7 @@ app.use('/auth', authRouter);
 app.use('/workspaces', workspaceRouter);
 app.use('/ws-members', workspaceMemberRouter);
 app.use('/boards', boardRouter);
+app.use('/board-members', boardMemberRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
