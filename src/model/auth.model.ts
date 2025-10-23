@@ -16,6 +16,8 @@ class AuthModel {
           "name",
           "isVerified",
           "verifyToken",
+          "role",
+          "refreshToken", 
         ],
       });
 
@@ -45,6 +47,26 @@ class AuthModel {
     } catch (error) {
       console.error("Error in createUser:", error);
       throw new Error("Failed to create user");
+    }
+  }
+
+  async updateRefreshToken(userId: number, refreshToken: string): Promise<void> {
+    try {
+      const userRepository = AppDataSource.getRepository(User);
+      await userRepository.update(userId, { refreshToken });
+    } catch (error) {
+      console.error("Error in updateRefreshToken:", error);
+      throw new Error("Failed to update refresh token");
+    }
+  }
+
+  async getUserByRefreshToken(refreshToken: string): Promise<User | null> {
+    try {
+      const userRepository = AppDataSource.getRepository(User);
+      return await userRepository.findOne({ where: { refreshToken } });
+    } catch (error) {
+      console.error("Error in getUserByRefreshToken:", error);
+      throw new Error("Failed to get user by refresh token");
     }
   }
 }

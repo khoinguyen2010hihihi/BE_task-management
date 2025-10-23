@@ -1,13 +1,19 @@
 import bcrypt from "bcrypt";
 import authModel from "../model/auth.model";
 import hashProvides from "../provides/hash.provides";
-import userProvides from "../provides/user.provides";
+import { userProvides } from "../provides/user.provides";
 import { User } from "../entities/user.entity";
 import mailService from "./mail.service";
 import { AppDataSource } from "../data-source";
 
 class AuthService {
-  async loginUser(email: string, password: string): Promise<string> {
+  async loginUser(
+    email: string,
+    password: string
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const user = await authModel.getUserByEmail(email);
     if (!user) throw new Error("User not found");
 
@@ -18,7 +24,22 @@ class AuthService {
     const check = await hashProvides.compareHash(password, user.password!);
     if (!check) throw new Error("Incorrect password");
 
-    return await userProvides.encodeToken(user);
+    const accessToken = await userProvides.encodeToken({
+      id: user.id,
+      role: user.role,
+      email: user.email,
+    });
+
+    const refreshToken = await userProvides.encodeRefreshToken({
+      id: user.id,
+      role: user.role,
+      email: user.email,
+    });
+
+    user.refreshToken = refreshToken;
+    await authModel.updateRefreshToken(user.id, refreshToken);
+
+    return { accessToken, refreshToken };
   }
 
   async registerUser(
@@ -48,6 +69,7 @@ class AuthService {
       throw err;
     }
   }
+
   async verifyEmail(token: string): Promise<void> {
     const userRepository = AppDataSource.getRepository(User);
     const user = await userRepository.findOne({
@@ -60,6 +82,34 @@ class AuthService {
     user.isVerified = true;
     user.verifyToken = null;
     await userRepository.save(user);
+  }
+
+  async refreshAccessToken(
+    refreshToken: string
+  ): Promise<{ accessToken: string }> {
+    try {
+      if (!refreshToken) {
+        throw new Error("Refresh token is required");
+      }
+
+      const decoded = await userProvides.verifyRefreshToken(refreshToken);
+
+      const user = await authModel.getUserByRefreshToken(refreshToken);
+      if (!user) {
+        throw new Error("Invalid refresh token");
+      }
+
+      const accessToken = await userProvides.encodeToken({
+        id: user.id,
+        role: user.role,
+        email: user.email,
+      });
+
+      return { accessToken };
+    } catch (err) {
+      console.error("Error in refreshAccessToken:", err);
+      throw new Error("Invalid or expired refresh token");
+    }
   }
 }
 

@@ -22,4 +22,7 @@ export class User {
 
   @Column({ type: "varchar", nullable: true })
   verifyToken!: string | null;
+
+  @Column({ type: "text", nullable: true })
+  refreshToken!: string | null;
 }

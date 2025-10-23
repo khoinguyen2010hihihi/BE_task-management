@@ -9,12 +9,53 @@ class AuthController {
   ): Promise<void> {
     try {
       const { email, password } = req.body;
-      const token = await authService.loginUser(email, password);
+
+      if (!email || !password) {
+        res
+          .status(400)
+          .json({ success: false, message: "Email and password are required" });
+        return;
+      }
+
+      const { accessToken, refreshToken } = await authService.loginUser(
+        email,
+        password
+      );
 
       res.status(200).json({
         success: true,
-        token,
         message: "Login success",
+        accessToken,
+        refreshToken,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async refreshToken(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        res
+          .status(400)
+          .json({ success: false, message: "Refresh token is required" });
+        return;
+      }
+
+      const { accessToken } = await authService.refreshAccessToken(
+        refreshToken
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Access token refreshed successfully",
+        accessToken,
       });
     } catch (err) {
       next(err);

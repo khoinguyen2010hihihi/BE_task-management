@@ -14,6 +14,7 @@ router.post(
 
 router.post("/register", authControllers.registerUser);
 router.get("/verify-email", authControllers.verifyEmail);
+router.post("/refresh", authControllers.refreshToken);
 //CRUD workspace, board, database theo rbac.
 //register,
 
