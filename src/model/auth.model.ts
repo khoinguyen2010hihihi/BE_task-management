@@ -17,7 +17,7 @@ class AuthModel {
           "isVerified",
           "verifyToken",
           "role",
-          "refreshToken", 
+          "refreshToken",
         ],
       });
 
@@ -50,7 +50,10 @@ class AuthModel {
     }
   }
 
-  async updateRefreshToken(userId: number, refreshToken: string): Promise<void> {
+  async updateRefreshToken(
+    userId: number,
+    refreshToken: string
+  ): Promise<void> {
     try {
       const userRepository = AppDataSource.getRepository(User);
       await userRepository.update(userId, { refreshToken });
@@ -67,6 +70,20 @@ class AuthModel {
     } catch (error) {
       console.error("Error in getUserByRefreshToken:", error);
       throw new Error("Failed to get user by refresh token");
+    }
+  }
+
+  async getUserById(userId: number): Promise<User | null> {
+    try {
+      const userRepository = AppDataSource.getRepository(User);
+      const user = await userRepository.findOne({
+        where: { id: userId },
+        select: ["id", "email", "name", "role", "isVerified"],
+      });
+      return user;
+    } catch (err) {
+      console.log("Error in getUserById: ", err);
+      throw new Error("Failed to get user by ID");
     }
   }
 }

@@ -98,6 +98,21 @@ class AuthController {
       res.status(400).json({ message: "Invalid or expired token" });
     }
   }
+
+  async getInformation(req: Request, res: Response, next: NextFunction): Promise<void>{
+    try{
+      const userPayload = (req as any).user;
+      if (!userPayload){
+        res.status(401).json({message: "Unauthorized"});
+        return;
+      }
+      const user = await authService.getUserInformation(userPayload.id);
+      res.status(200).json({success: true, result: user});
+
+    } catch(err){
+      next(err);
+    }
+  }
 }
 
 export default new AuthController();

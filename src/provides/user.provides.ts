@@ -18,7 +18,7 @@ export const userProvides = {
   async encodeToken(user: UserPayload): Promise<string> {
     const secret = getEnv("JWT_SECRET");
     const expiresIn = (process.env.JWT_EXPIRES_IN ??
-      "1h") as SignOptions["expiresIn"];
+      "1m") as SignOptions["expiresIn"];
 
     const payload = {
       id: user.id,

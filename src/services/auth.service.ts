@@ -111,6 +111,14 @@ class AuthService {
       throw new Error("Invalid or expired refresh token");
     }
   }
+
+  async getUserInformation(userId: number): Promise<User | null>{
+    const user = await authModel.getUserById(userId);
+    if (!user){
+      throw new Error("User not found");
+    }
+    return user;
+  }
 }
 
 export default new AuthService();
