@@ -26,6 +26,7 @@ export enum WorkspaceMemberRole {
 }
 
 export enum BoardMemberRole {
+  OWNER = 'owner',
   ADMIN = 'admin',
   NORMAL = 'normal',
   OBSERVER = 'observer',

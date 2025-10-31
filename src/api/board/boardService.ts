@@ -1,3 +1,4 @@
+import { boardMemberRepository, BoardMemberRepository } from './../board-member/boardMemberRepository';
 import { boardRepository } from "./boardRepository";
 import { workspaceRepository } from "../workspace/workspaceRepository";
 import { AppDataSource } from "@/configs/typeorm.config";
@@ -6,8 +7,9 @@ import { ServiceResponse, ResponseStatus } from "@/common/models/serviceResponse
 import { StatusCodes } from "http-status-codes";
 import { logger } from "@/server";
 import { CreateBoardInput, UpdateBoardInput } from "./boardModel";
-import { WorkspaceMemberRole } from "@/common/entities/enums";
+import { BoardMemberRole, WorkspaceMemberRole } from "@/common/entities/enums";
 import { workspaceMemberRepository } from "../workspace-member/workspaceMemberRepository";
+import { userRepository } from '../user/userRepository';
 
 export class BoardService {
   async getAll(workspaceId: string): Promise<ServiceResponse<any>> {
@@ -41,17 +43,25 @@ export class BoardService {
       if (!workspace)
         return new ServiceResponse(ResponseStatus.Failed, "Workspace not found", null, StatusCodes.NOT_FOUND);
 
-      const member = await workspaceMemberRepository.findAllMembersByWorkspaceId(workspaceId);
-      const current = member.find((m) => m.userId === currentUserId);
+      const members = await workspaceMemberRepository.findAllMembersByWorkspaceId(workspaceId);
+      const current = members.find((m) => m.userId === currentUserId);
 
       if (!current || (current.role !== WorkspaceMemberRole.OWNER && current.role !== WorkspaceMemberRole.ADMIN))
         return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to create a board", null, StatusCodes.FORBIDDEN);
 
-      const userRepo = AppDataSource.getRepository(User);
-      const creator = await userRepo.findOneBy({ id: currentUserId });
+      const creator = await userRepository.findByIdAsync(currentUserId);
+      if (!creator) {
+        return new ServiceResponse(ResponseStatus.Failed, "Creator not found", null, StatusCodes.BAD_REQUEST);
+      }
 
-      const board = await boardRepository.createAsync(payload, workspace, creator!);
-      const fommatedInfo = {
+      const board = await boardRepository.createAsync(payload, workspace, creator);
+
+      await boardMemberRepository.addMember(board, creator, { 
+        userId: creator.id, 
+        role: BoardMemberRole.OWNER 
+      });
+
+      const formattedInfo = {
         id: board.id,
         name: board.name,
         slug: board.slug,
@@ -60,20 +70,27 @@ export class BoardService {
         isClosed: board.isClosed,
         visibility: board.visibility,
         createdBy: {
-          id: creator?.id,
-          fullName: creator?.fullName,
-          email: creator?.email
+          id: creator.id,
+          fullName: creator.fullName,
+          email: creator.email,
         },
         createdAt: board.createdAt,
-        updatedAt: board.updatedAt
-      }
-      return new ServiceResponse(ResponseStatus.Success, "Board created successfully", fommatedInfo, StatusCodes.CREATED);
+        updatedAt: board.updatedAt,
+      };
+
+      return new ServiceResponse(
+        ResponseStatus.Success,
+        "Board created successfully",
+        formattedInfo,
+        StatusCodes.CREATED
+      );
     } catch (error) {
       const msg = `Error creating board: ${(error as Error).message}`;
       logger.error(msg);
       return new ServiceResponse(ResponseStatus.Failed, msg, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+
 
   async update(currentUserId: string, workspaceId: string, boardId: string, payload: UpdateBoardInput): Promise<ServiceResponse<any>> {
     try {
