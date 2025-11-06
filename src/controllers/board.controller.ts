@@ -55,6 +55,16 @@ class BoardController {
       res.status(400).json({ error: err.message });
     }
   }
+
+  async getByWorkspaceId(req: Request, res: Response) {
+    try {
+      const workspace_id = parseInt(req.params.workspace_id);
+      const data = await boardService.getBoardsByWorkspaceId(workspace_id);
+      res.json(data);
+    } catch (err: any) {
+      res.status(404).json({ error: err.message });
+    }
+  }
 }
 
 export default new BoardController();

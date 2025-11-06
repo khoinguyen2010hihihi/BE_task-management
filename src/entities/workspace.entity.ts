@@ -8,8 +8,8 @@ import {
 } from "typeorm";
 import { Board } from "./board.entity";
 
-@Entity("workspace")
-export class workspace {
+@Entity("workspaces")
+export class Workspace {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -17,7 +17,7 @@ export class workspace {
   name!: string;
 
   @Column({ type: "text", nullable: true })
-  description!: string;
+  description!: string | null;
 
   @Column({ default: false })
   is_delete!: boolean;

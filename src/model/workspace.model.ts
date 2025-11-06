@@ -1,15 +1,21 @@
 import { webcrypto } from "crypto";
 import { AppDataSource } from "../data-source";
-import { workspace } from "../entities/workspace.entity";
+import { Workspace } from "../entities/workspace.entity";
 
 class WorkspaceModel {
-  private workspaceRepository = AppDataSource.getRepository(workspace);
+  private workspaceRepository = AppDataSource.getRepository(Workspace);
 
   async getAll() {
-    return await this.workspaceRepository.find({
+    const workspaces = await this.workspaceRepository.find({
       where: { is_delete: false },
+      relations: ["boards"], 
       order: { id: "ASC" },
     });
+
+    return workspaces.map((ws) => ({
+      ...ws,
+      countBoard: ws.boards ? ws.boards.length : 0,
+    }));
   }
 
   async getById(id: number) {
