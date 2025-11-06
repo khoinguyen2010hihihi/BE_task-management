@@ -45,7 +45,7 @@ class AuthService {
   async registerUser(
     email: string,
     password: string,
-    userName: string
+    name: string
   ): Promise<string> {
     try {
       const existingUser = (await authModel.getUserByEmail(
@@ -57,7 +57,7 @@ class AuthService {
 
       const { hashString } = await hashProvides.generateHash(password);
 
-      const newUser = await authModel.createUser(email, hashString, userName);
+      const newUser = await authModel.createUser(email, hashString, name);
 
       await mailService.sendVerificationEmail(
         newUser.email,

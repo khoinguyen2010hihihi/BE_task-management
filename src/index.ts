@@ -1,12 +1,13 @@
 import express from "express";
-import bodyParser from "body-parser";
 import { AppDataSource } from "./data-source";
 import router from "./routes/app.route";
 import { setupSwagger } from "./api-docs/openAPIRouter";
 import cors from "cors";
 
 const app = express();
-app.use(bodyParser.json());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 setupSwagger(app);
 app.use(

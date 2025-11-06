@@ -68,8 +68,8 @@ class AuthController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { email, password, userName } = req.body;
-      const user = await authService.registerUser(email, password, userName);
+      const { email, password, name } = req.body;
+      const user = await authService.registerUser(email, password, name);
       res.status(200).json({
         success: true,
         user,

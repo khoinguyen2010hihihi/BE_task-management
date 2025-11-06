@@ -31,7 +31,7 @@ class AuthModel {
   async createUser(
     email: string,
     hashedPassword: string,
-    userName: string
+    user: string
   ): Promise<User> {
     try {
       const userRepository = AppDataSource.getRepository(User);
@@ -39,7 +39,7 @@ class AuthModel {
       const newUser = new User();
       newUser.email = email;
       newUser.password = hashedPassword;
-      newUser.name = userName;
+      newUser.name = user;
       newUser.isVerified = false;
       newUser.verifyToken = crypto.randomBytes(32).toString("hex");
 
