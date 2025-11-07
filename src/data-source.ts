@@ -3,6 +3,8 @@ import { DataSource } from "typeorm";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { User } from "./entities/user.entity";
+import { Workspace } from "./entities/workspace.entity";
+import { Board } from "./entities/board.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -13,5 +15,5 @@ export const AppDataSource = new DataSource({
   database: "mydb",
   synchronize: true,
   logging: true,
-  entities: [User],
+  entities: [User, Workspace, Board],
 });
