@@ -28,13 +28,16 @@ class BoardModel {
   async createBoard(
     name: string,
     workspace_id: number,
+    created_by_id: number,
     cover_url?: string
   ): Promise<Board> {
     const newBoard = this.boardRepository.create({
       name,
       workspace_id,
+      created_by_id,
       cover_url: cover_url || null,
     });
+    
     return await this.boardRepository.save(newBoard);
   }
 
