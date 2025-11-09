@@ -3,6 +3,8 @@ import { AppDataSource } from "./data-source";
 import router from "./routes/app.route";
 import { setupSwagger } from "./api-docs/openAPIRouter";
 import cors from "cors";
+import notFound from "./middleware/notFound";
+import { errorHandler } from "./handler/error-handler";
 
 const app = express();
 
@@ -22,7 +24,10 @@ AppDataSource.initialize()
   .then(() => {
     console.log("Database connected successfully");
 
-    app.use("/", router);
+    // http://localhost:3000 -> http://localhost:3000/api
+    app.use("/api", router);
+    app.use(notFound);
+    app.use(errorHandler);
 
     app.listen(3000, () => {
       console.log("Server running at http://localhost:3000");

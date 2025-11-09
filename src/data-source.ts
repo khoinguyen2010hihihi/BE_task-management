@@ -5,6 +5,7 @@ dotenv.config();
 import { User } from "./entities/user.entity";
 import { Workspace } from "./entities/workspace.entity";
 import { Board } from "./entities/board.entity";
+import { WorkspaceMember } from "./entities/workspace-member.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -15,5 +16,5 @@ export const AppDataSource = new DataSource({
   database: "mydb",
   synchronize: true,
   logging: true,
-  entities: [User, Workspace, Board],
+  entities: [User, Workspace, Board, WorkspaceMember],
 });
