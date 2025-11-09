@@ -1,23 +1,40 @@
-import userRouter from "./user.route";
 import { Router } from "express";
-import authControllers from "../controllers/auth.controllers";
-import validateMiddleware from "../middleware/validate.middleware";
+import authController from "../controllers/auth.controllers";
+import { asyncHandler } from "../middleware/asyncHandler";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { validateRequest } from "../utils/http-handler";
+import { AuthSchema } from "../schemas/auth.schema";
 
 const router = Router();
-router.use("/", userRouter);
 
 router.post(
   "/login",
-  validateMiddleware.validateLogin,
-  authControllers.loginUser
+  validateRequest(AuthSchema.Login),
+  asyncHandler(authController.loginUser)
 );
 
-router.post("/register", authControllers.registerUser);
-router.get("/verify-email", authControllers.verifyEmail);
-router.post("/refresh", authControllers.refreshToken);
-router.get("/information", authMiddleware, authControllers.getInformation);
-//CRUD workspace, board, database theo rbac.
-//register,
+router.post(
+  "/register",
+  validateRequest(AuthSchema.Register),
+  asyncHandler(authController.registerUser)
+);
+
+router.get(
+  "/verify-email",
+  validateRequest(AuthSchema.VerifyEmail),
+  asyncHandler(authController.verifyEmail)
+);
+
+router.post(
+  "/refresh",
+  validateRequest(AuthSchema.RefreshToken),
+  asyncHandler(authController.refreshToken)
+);
+
+router.get(
+  "/information",
+  authMiddleware,
+  asyncHandler(authController.getInformation)
+);
 
 export default router;
