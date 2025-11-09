@@ -1,30 +1,56 @@
 import boardModel from "../model/board.model";
 import { Board } from "../entities/board.entity";
-
+import { InternalServerError, ErrorResponse } from "../handler/error.response";
 class BoardService {
   async getAll(): Promise<Board[]> {
-    return await boardModel.getAll();
+    try {
+      return await boardModel.getAll();
+    } catch (error) {
+      throw new InternalServerError("Failed to fetch boards");
+    }
   }
 
   async getById(id: number): Promise<Board> {
-    const board = await boardModel.getById(id);
-    if (!board) throw new Error("Board not found");
-    return board;
+    try {
+      const board = await boardModel.getById(id);
+      if (!board) {
+        throw new ErrorResponse("Board not found", 404);
+      }
+      return board;
+    } catch (error) {
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new InternalServerError("Failed to fetch board");
+    }
   }
 
   async getBoardsByWorkspaceId(workspace_id: number): Promise<Board[]> {
-    const boards = await boardModel.getBoardsByWorkspaceId(workspace_id);
-    if (!boards || boards.length === 0)
-      throw new Error("No boards found for this workspace");
-    return boards;
+    try {
+      const boards = await boardModel.getBoardsByWorkspaceId(workspace_id);
+      if (!boards || boards.length === 0) {
+        throw new ErrorResponse("No boards found for this workspace", 404);
+      }
+      return boards;
+    } catch (error) {
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new InternalServerError("Failed to fetch boards");
+    }
   }
 
   async createBoard(
     name: string,
     workspace_id: number,
-    cover_url?: string
+    create_by_id: number,
+    cover_url?: string,
   ): Promise<Board> {
-    return await boardModel.createBoard(name, workspace_id, cover_url);
+    try {
+      return await boardModel.createBoard(name, workspace_id, create_by_id, cover_url);
+    } catch (error) {
+      throw new InternalServerError("Failed to create board");
+    }
   }
 
   async updateBoard(
@@ -32,11 +58,31 @@ class BoardService {
     name: string,
     cover_url?: string
   ): Promise<Board> {
-    return await boardModel.updateBoard(id, name, cover_url);
+    try {
+      return await boardModel.updateBoard(id, name, cover_url);
+    } catch (error) {
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      if (error instanceof Error && error.message === "Board not found") {
+        throw new ErrorResponse(error.message, 404);
+      }
+      throw new InternalServerError("Failed to update board");
+    }
   }
 
   async deleteBoard(id: number): Promise<void> {
-    await boardModel.deleteBoard(id);
+    try {
+      await boardModel.deleteBoard(id);
+    } catch (error) {
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      if (error instanceof Error && error.message === "Board not found") {
+        throw new ErrorResponse(error.message, 404);
+      }
+      throw new InternalServerError("Failed to delete board");
+    }
   }
 }
 
