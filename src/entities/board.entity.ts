@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { Workspace } from "./workspace.entity";
+import { User } from "./user.entity";
 
 @Entity("boards")
 export class Board {
@@ -28,6 +29,14 @@ export class Board {
 
   @Column()
   workspace_id!: number;
+
+  /** User create board */
+  @ManyToOne(() => User, (user) => user.createdBoards, { onDelete: "SET NULL" })
+  @JoinColumn({ name: "created_by_id" })
+  created_by!: User;
+
+  @Column({ type: "int", nullable: true })
+  created_by_id!: number | null;
 
   @Column({ type: "int", nullable: true })
   card_id!: number | null;
