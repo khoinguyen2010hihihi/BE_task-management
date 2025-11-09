@@ -1,61 +1,114 @@
 import { Request, Response } from "express";
 import workspaceService from "../services/workspace.service";
+import { handleServiceResponse } from "../utils/http-handler";
+import { ResponseStatus, ServiceResponse } from "../provides/service.response";
+import { AuthFailureError, BadRequestError, NotFoundError } from "../handler/error.response";
+class WorkspaceController {
+  getAllWorkspace = async (_req: Request, res: Response) => {
+    const data = await workspaceService.getAll();
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Workspaces retrieved successfully",
+        data,
+        200
+      ),
+      res
+    );
+  };
 
-class workspaceController {
-  async getAllWorkspace(req: Request, res: Response) {
-    try {
-      const data = await workspaceService.getAll();
-      res.json(data);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
+  getWorkspaceById = async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      throw new NotFoundError("Invalid workspace id");
     }
-  }
+    const data = await workspaceService.getById(id);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Workspace retrieved successfully",
+        data,
+        200
+      ),
+      res
+    );
+  };
 
-  async getWorkspaceById(req: Request, res: Response) {
-    try {
-      const id = parseInt(req.params.id);
-      const data = await workspaceService.getById(id);
-      res.json(data);
-    } catch (err: any) {
-      res.status(404).json({ err: err.message });
-    }
-  }
+  createWorkspace = async (req: Request, res: Response) => {
+    const { name, description } = req.body;
+    const userId = (req as any).user?.id;
 
-  async createWorkspace(req: Request, res: Response) {
-    try {
-      const { name, description } = req.body;
-      const data = await workspaceService.createWorkspace(name, description);
-      res.status(201).json(data);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+    if (!name) {
+      throw new BadRequestError("Workspace name is required");
     }
-  }
+
+    if (!userId) {
+      throw new AuthFailureError("Unauthorized");
+    }
+
+    const data = await workspaceService.createWorkspace(name, description, userId);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Workspace created successfully",
+        data,
+        201
+      ),
+      res
+    );
+  };
 
   updateWorkspace = async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { name, description, is_active } = req.body;
-      const data = await workspaceService.updateWorkspace(
-        id,
-        name,
-        description,
-        is_active
-      );
-      res.json(data);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      throw new NotFoundError("Invalid workspace id");
     }
+
+    const { name, description, is_active } = req.body;
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      throw new BadRequestError("Unauthorized");
+    }
+
+    const data = await workspaceService.updateWorkspace(
+      id,
+      name,
+      description,
+      is_active,
+      userId
+    );
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Workspace updated successfully",
+        data,
+        200
+      ),
+      res
+    );
   };
 
   deleteWorkspace = async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const data = await workspaceService.deleteWorkspace(id);
-      res.json({ message: "Workspace deleted successfully", data });
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      throw new NotFoundError("Invalid workspace id");
     }
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      throw new BadRequestError("Unauthorized");
+    }
+    const data = await workspaceService.deleteWorkspace(id, userId);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Workspace deleted successfully",
+        data,
+        200
+      ),
+      res
+    );
   };
 }
 
-export default new workspaceController();
+export default new WorkspaceController();

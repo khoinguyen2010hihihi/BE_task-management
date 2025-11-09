@@ -1,70 +1,129 @@
 import { Request, Response } from "express";
 import boardService from "../services/board.service";
+import {
+  ServiceResponse,
+  ResponseStatus,
+} from "../provides/service.response";
+import {
+  AuthFailureError,
+  BadRequestError,
+  NotFoundError,
+} from "../handler/error.response";
+import { handleServiceResponse } from "../utils/http-handler";
 
 class BoardController {
-  async getAll(req: Request, res: Response) {
-    try {
-      const data = await boardService.getAll();
-      res.json(data);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  }
+  getAll = async (_req: Request, res: Response) => {
+    const boards = await boardService.getAll();
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Boards retrieved successfully",
+        boards,
+        200
+      ),
+      res
+    );
+  };
 
-  async getById(req: Request, res: Response) {
-    try {
-      const id = parseInt(req.params.id);
-      const data = await boardService.getById(id);
-      res.json(data);
-    } catch (err: any) {
-      res.status(404).json({ error: err.message });
+  getById = async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      throw new BadRequestError("Invalid board id");
     }
-  }
+    const data = await boardService.getById(id);
+    if (!data) {
+      throw new NotFoundError("Board not found");
+    }
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Board retrieved successfully",
+        data,
+        200
+      ),
+      res
+    );
+  };
 
-  async create(req: Request, res: Response) {
-    try {
-      const { name, workspace_id, cover_url } = req.body;
-      const data = await boardService.createBoard(
-        name,
-        workspace_id,
-        cover_url
-      );
-      res.status(201).json(data);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+  create = async (req: Request, res: Response) => {
+    const { name, workspace_id, cover_url } = req.body;
+    const userId = (req as any).user?.id
+    if (!name || !workspace_id) {
+      throw new BadRequestError("Board name and workspace are required");
     }
-  }
 
-  async update(req: Request, res: Response) {
-    try {
-      const id = parseInt(req.params.id);
-      const { name, cover_url } = req.body;
-      const data = await boardService.updateBoard(id, name, cover_url);
-      res.json(data);
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+    if (!userId) {
+      throw new AuthFailureError("Unauthorized");
     }
-  }
+    const data = await boardService.createBoard(name, workspace_id, cover_url);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Board created successfully",
+        data,
+        201
+      ),
+      res
+    );
+  };
 
-  async delete(req: Request, res: Response) {
-    try {
-      const id = parseInt(req.params.id);
-      await boardService.deleteBoard(id);
-      res.json({ message: "Board deleted successfully" });
-    } catch (err: any) {
-      res.status(400).json({ error: err.message });
+  update = async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      throw new BadRequestError("Invalid board id");
     }
-  }
+    const { name, cover_url } = req.body;
+    const data = await boardService.updateBoard(id, name, cover_url);
+    if (!data) {
+      throw new NotFoundError("Board not found");
+    }
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Board updated successfully",
+        data,
+        200
+      ),
+      res
+    );
+  };
 
-  async getByWorkspaceId(req: Request, res: Response) {
-    try {
-      const workspace_id = parseInt(req.params.workspace_id);
-      const data = await boardService.getBoardsByWorkspaceId(workspace_id);
-      res.json(data);
-    } catch (err: any) {
-      res.status(404).json({ error: err.message });
+  delete = async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      throw new BadRequestError("Invalid board id");
     }
-  }
+    await boardService.deleteBoard(id);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Board deleted successfully",
+        null,
+        200
+      ),
+      res
+    );
+  };
+
+  getByWorkspaceId = async (req: Request, res: Response) => {
+    const workspaceId = parseInt(req.params.workspace_id, 10);
+    if (Number.isNaN(workspaceId)) {
+      throw new BadRequestError("Invalid workspace id");
+    }
+    const data = await boardService.getBoardsByWorkspaceId(workspaceId);
+    if (!data || data.length === 0) {
+      throw new NotFoundError("No boards found for this workspace");
+    }
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Boards retrieved successfully",
+        data,
+        200
+      ),
+      res
+    );
+  };
 }
 
 export default new BoardController();

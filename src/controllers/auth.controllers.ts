@@ -1,118 +1,106 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import authService from "../services/auth.service";
+import {
+  ServiceResponse,
+  ResponseStatus,
+} from "../provides/service.response";
+import {
+  BadRequestError,
+  ForbiddenError,
+} from "../handler/error.response";
+import { handleServiceResponse } from "../utils/http-handler";
 
 class AuthController {
-  async loginUser(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { email, password } = req.body;
+  loginUser = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
 
-      if (!email || !password) {
-        res
-          .status(400)
-          .json({ success: false, message: "Email and password are required" });
-        return;
-      }
-
-      const { accessToken, refreshToken } = await authService.loginUser(
-        email,
-        password
-      );
-
-      res.status(200).json({
-        success: true,
-        message: "Login success",
-        accessToken,
-        refreshToken,
-      });
-    } catch (err) {
-      next(err);
+    if (!email || !password) {
+      throw new BadRequestError("Email and password are required");
     }
-  }
 
-  async refreshToken(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { refreshToken } = req.body;
+    const { accessToken, refreshToken } = await authService.loginUser(
+      email,
+      password
+    );
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Login success",
+        { accessToken, refreshToken },
+        200
+      ),
+      res
+    );
+  };
 
-      if (!refreshToken) {
-        res
-          .status(400)
-          .json({ success: false, message: "Refresh token is required" });
-        return;
-      }
+  refreshToken = async (req: Request, res: Response) => {
+    const { refreshToken } = req.body;
 
-      const { accessToken } = await authService.refreshAccessToken(
-        refreshToken
-      );
-
-      res.status(200).json({
-        success: true,
-        message: "Access token refreshed successfully",
-        accessToken,
-      });
-    } catch (err) {
-      next(err);
+    if (!refreshToken) {
+      throw new BadRequestError("Refresh token is required");
     }
-  }
 
-  async registerUser(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { email, password, name } = req.body;
-      const user = await authService.registerUser(email, password, name);
-      res.status(200).json({
-        success: true,
+    const { accessToken } = await authService.refreshAccessToken(refreshToken);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Access token refreshed successfully",
+        { accessToken },
+        200
+      ),
+      res
+    );
+  };
+
+  registerUser = async (req: Request, res: Response) => {
+    const { email, password, name } = req.body;
+    const user = await authService.registerUser(email, password, name);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Register success",
         user,
-        message: "Register success",
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-  async verifyEmail(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+        201
+      ),
+      res
+    );
+  };
+
+  verifyEmail = async (req: Request, res: Response) => {
     const { token } = req.query;
 
     if (!token) {
-      res.status(400).json({ message: "Missing token" });
-      return;
+      throw new BadRequestError("Missing token");
     }
 
-    try {
-      await authService.verifyEmail(token as string);
-      res.status(200).json({ message: "Email verified successfully" });
-    } catch (err) {
-      res.status(400).json({ message: "Invalid or expired token" });
-    }
-  }
+    await authService.verifyEmail(token as string);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Email verified successfully",
+        null,
+        200
+      ),
+      res
+    );
+  };
 
-  async getInformation(req: Request, res: Response, next: NextFunction): Promise<void>{
-    try{
-      const userPayload = (req as any).user;
-      if (!userPayload){
-        res.status(401).json({message: "Unauthorized"});
-        return;
-      }
-      const user = await authService.getUserInformation(userPayload.id);
-      res.status(200).json({success: true, result: user});
-
-    } catch(err){
-      next(err);
+  getInformation = async (req: Request, res: Response) => {
+    const userPayload = (req as any).user;
+    if (!userPayload) {
+      throw new ForbiddenError("Unauthorized access");
     }
-  }
+    const user = await authService.getUserInformation(userPayload.id);
+    return handleServiceResponse(
+      new ServiceResponse(
+        ResponseStatus.Sucess,
+        "Fetched user information",
+        user,
+        200
+      ),
+      res
+    );
+  };
 }
 
 export default new AuthController();
